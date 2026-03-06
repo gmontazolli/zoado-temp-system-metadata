@@ -2147,10 +2147,12 @@
         }
         
         #sidebar-overlay { display: none; }
-        /* ========== Mobile: layout Bitwarden (top bar + lista + bottom nav + FAB) ========== */
-        #mobile-top-bar, #mobile-bottom-nav, #mobile-fab, #mobile-editor-back { display: none; }
+        .note-card-menu-btn { display: flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; border: none; background: none; color: var(--gh-text-muted); border-radius: 6px; flex-shrink: 0; }
+        .note-card-menu-btn:hover { background: var(--gh-input-bg); color: var(--gh-text); }
+        /* ========== Mobile: layout Notepad (grande, legível, sem zoom) ========== */
+        #mobile-top-bar, #mobile-bottom-nav, #mobile-fab, #mobile-editor-back, #mobile-category-pills { display: none; }
         @media (max-width: 1024px) {
-            html { font-size: 16px; max-width: 100vw; overflow-x: hidden; }
+            html { font-size: 18px; max-width: 100vw; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
             body { font-size: 1rem; max-width: 100vw; overflow-x: hidden; }
             * { box-sizing: border-box; }
             #title-bar { display: none !important; }
@@ -2180,7 +2182,7 @@
                 background: var(--gh-bg);
                 border-bottom: 1px solid var(--gh-border);
             }
-            #mobile-top-bar .mobile-logo { font-weight: 700; font-size: 1.1rem; color: var(--accent-color); }
+            #mobile-top-bar .mobile-logo { font-weight: 700; font-size: 1.25rem; color: var(--accent-color); }
             #mobile-top-bar .mobile-actions { display: flex; align-items: center; gap: 8px; }
             #mobile-top-bar .mobile-icon-btn {
                 width: 44px; height: 44px;
@@ -2211,15 +2213,15 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 2px;
+                gap: 4px;
                 height: 100%;
-                min-height: 44px;
+                min-height: 48px;
                 background: none;
                 border: none;
                 color: var(--gh-text-muted);
-                font-size: 0.7rem;
+                font-size: 0.75rem;
             }
-            #mobile-bottom-nav .mobile-nav-item i { font-size: 1.2rem; }
+            #mobile-bottom-nav .mobile-nav-item i { font-size: 1.35rem; }
             #mobile-bottom-nav .mobile-nav-item.active { color: var(--accent-color); }
             #mobile-bottom-nav .mobile-nav-item:active { background: var(--gh-input-bg); }
             /* FAB - criar nota */
@@ -2302,15 +2304,35 @@
             body.current-view-notes:not(.mobile-editor-open) #app-container aside #sidebar-footer-buttons { display: none !important; }
             body.current-view-notes:not(.mobile-editor-open) #app-container aside #check-updates-btn,
             body.current-view-notes:not(.mobile-editor-open) #app-container aside #update-status { display: none !important; }
-            /* Lista de notas - cards limpos */
-            .note-list-item {
-                padding: 14px 12px;
-                font-size: 1rem;
-                min-height: 56px;
-                margin-bottom: 4px;
-                border-radius: 10px;
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside #folders-section { display: none !important; }
+            /* Pills de categorias (pastas) */
+            #mobile-category-pills { display: flex !important; overflow-x: auto; gap: 8px; padding: 12px 16px; -webkit-overflow-scrolling: touch; }
+            #mobile-category-pills .mobile-pill {
+                flex-shrink: 0;
+                padding: 10px 18px;
+                border-radius: 999px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                border: none;
+                background: var(--gh-input-bg);
+                color: var(--gh-text-muted);
             }
-            .note-list-item.selected { border-left-width: 4px; }
+            #mobile-category-pills .mobile-pill.active { background: var(--accent-color); color: #0f172a; }
+            /* Lista de notas - cards grandes estilo Notepad */
+            .note-list-item {
+                padding: 16px 16px;
+                font-size: 1.05rem;
+                min-height: 72px;
+                margin-bottom: 10px;
+                border-radius: 12px;
+                border-left: 6px solid var(--accent-color);
+                background: var(--gh-input-bg);
+            }
+            .note-list-item .note-card-title { font-weight: 600; font-size: 1.1rem; }
+            .note-list-item .note-card-date { font-size: 0.85rem; color: var(--gh-text-muted); margin-top: 4px; }
+            .note-list-item .note-card-menu-btn { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--gh-text-muted); border-radius: 8px; }
+            .note-list-item .note-card-menu-btn:active { background: var(--gh-canvas); }
+            .note-list-item.selected { border-left-width: 6px; border-left-color: var(--accent-color); background: var(--accent-muted); }
             .glass-effect, #editor-container, #notes-view .glass-effect, #dashboard-view .glass-effect {
                 width: 100% !important;
                 max-width: 100% !important;
@@ -2389,9 +2411,11 @@
     <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true" title="Fechar menu"></div>
     <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Abrir menu"><i class="fas fa-bars"></i></button>
     <header id="mobile-top-bar">
+        <button type="button" id="mobile-menu-btn" class="mobile-icon-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
         <span class="mobile-logo">DKNOTES</span>
         <div class="mobile-actions">
-            <button type="button" id="mobile-menu-btn" class="mobile-icon-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+            <button type="button" id="mobile-search-btn" class="mobile-icon-btn" aria-label="Pesquisar"><i class="fas fa-search"></i></button>
+            <button type="button" id="mobile-menu-dots" class="mobile-icon-btn" aria-label="Opções"><i class="fas fa-ellipsis-v"></i></button>
         </div>
     </header>
     <nav id="mobile-bottom-nav">
@@ -2419,6 +2443,7 @@
                 <button id="mode-mood-btn">Anotações</button>
                 <button id="mode-events-btn" class="relative">Datas</button>
             </div>
+            <div id="mobile-category-pills" class="mobile-category-pills"></div>
             <div id="sidebar-search-wrapper" class="mb-3 flex-shrink-0 flex items-center gap-2">
                 <div class="relative flex-1 min-w-0">
                     <input type="text" id="search-input" placeholder="Pesquisar..." class="w-full bg-slate-900/50 border border-slate-700 text-white placeholder-slate-400 text-xs rounded-md pl-8 pr-7 py-1 focus:outline-none focus:ring-2">
@@ -2746,6 +2771,7 @@
             </div>
         </div>
     </div>
+    <div id="mobile-note-context-menu" class="fixed hidden z-[1100] py-1 rounded-lg shadow-xl min-w-[200px] border" style="background: var(--gh-canvas); border-color: var(--gh-border);"></div>
     <div id="select-tag-modal-overlay" class="fixed inset-0 z-[60] flex items-center justify-center hidden">
         <div class="absolute inset-0 bg-black/60" id="select-tag-modal-backdrop"></div>
         <div id="select-tag-modal-panel" class="relative glass-effect rounded-lg shadow-xl w-full max-w-md max-h-[80vh] p-4 flex flex-col">
@@ -6783,7 +6809,39 @@ const getStorageKey = (baseKey) => {
         selectNote(newNote.id); 
         showNotification('Nota local duplicada!', false); 
     }
-    const closeAllPopups = () => { iconFilterPopup.style.display = 'none'; popupOpen = null; document.getElementById('export-menu-dropdown')?.classList.add('hidden'); };
+    const closeAllPopups = () => { iconFilterPopup.style.display = 'none'; popupOpen = null; document.getElementById('export-menu-dropdown')?.classList.add('hidden'); const mctx = document.getElementById('mobile-note-context-menu'); if (mctx) { mctx.classList.add('hidden'); mctx.innerHTML = ''; } };
+    const openMobileNoteContextMenu = (ev, note) => {
+        closeAllPopups();
+        const menu = document.getElementById('mobile-note-context-menu');
+        if (!menu) return;
+        const rect = ev.currentTarget.getBoundingClientRect();
+        menu.style.left = `${Math.min(rect.right, window.innerWidth - 220)}px`;
+        menu.style.top = `${rect.bottom + 8}px`;
+        menu.style.background = 'var(--gh-canvas)';
+        menu.style.borderColor = 'var(--gh-border)';
+        menu.innerHTML = `
+            <button type="button" class="ctx-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-700/50" data-action="edit"><i class="fas fa-edit text-slate-400 w-5"></i>Editar</button>
+            <button type="button" class="ctx-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-700/50" data-action="duplicate"><i class="fas fa-copy text-slate-400 w-5"></i>Duplicar</button>
+            <button type="button" class="ctx-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-700/50" data-action="export"><i class="fas fa-file-pdf text-slate-400 w-5"></i>Exportar PDF</button>
+            <button type="button" class="ctx-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-700/50" data-action="pin"><i class="fas fa-thumbtack text-slate-400 w-5"></i>${note.pinned ? 'Desafixar' : 'Fixar'}</button>
+            <button type="button" class="ctx-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-red-900/30 text-red-400" data-action="delete"><i class="fas fa-trash-alt w-5"></i>Apagar</button>
+        `;
+        menu.classList.remove('hidden');
+        const handler = (e) => {
+            const btn = e.target.closest('.ctx-item');
+            if (!btn) return;
+            const action = btn.dataset.action;
+            menu.classList.add('hidden');
+            menu.innerHTML = '';
+            document.removeEventListener('click', handler);
+            if (action === 'edit') { selectNote(note.id); return; }
+            if (action === 'pin') { togglePinNote(note.id, note.isPrivate); return; }
+            if (action === 'delete') { currentNoteId = note.id; deleteCurrentNote(); return; }
+            if (action === 'duplicate') { currentNoteId = note.id; duplicateCurrentNote(); return; }
+            if (action === 'export') { selectNote(note.id).then(() => exportCurrentNoteToPDF()); return; }
+        };
+        setTimeout(() => document.addEventListener('click', handler), 50);
+    };
     const openFilterPopup = (type, anchorElement) => {
         const popup = document.getElementById(`${type}-filter-popup`);
         popupOpen = type;
@@ -7163,8 +7221,8 @@ const getStorageKey = (baseKey) => {
         
         const filterByFolder = (arr) => {
             if (searchTerm) return arr;
-            // Lista abaixo da Lixeira: só notas SEM pasta. Notas com pasta ficam só dentro da pasta na árvore
-            return arr.filter(n => !n.folderId || n.folderId === null);
+            if (currentFolder === null) return arr.filter(n => !n.folderId || n.folderId === null);
+            return arr.filter(n => n.folderId === currentFolder);
         };
         notesToRender = filterByFolder(notesToRender);
         privToRender = filterByFolder(privToRender);
@@ -7188,34 +7246,47 @@ const getStorageKey = (baseKey) => {
         const BATCH = 40;
         let index = 0;
         const createNoteElement = (note) => {
+            const stripeColor = note.isPrivate ? (getFolderColor(note.folderId) || (note.tag && tagsConfig[note.tag]?.color) || '#38bdf8') : ((note.tag && tagsConfig[note.tag]?.color) || getFolderColor(note.folderId) || 'var(--accent-color)');
             const li = document.createElement('li');
-            li.className = `note-list-item p-3 rounded-md cursor-pointer transition-colors note-list-item-enter ${note.id === currentNoteId ? 'selected' : ''}`;
+            li.className = `note-list-item p-3 rounded-md cursor-pointer transition-colors note-list-item-enter flex items-center gap-3 ${note.id === currentNoteId ? 'selected' : ''}`;
             li.dataset.id = note.id;
+            li.style.borderLeftColor = stripeColor;
+            const leftBlock = document.createElement('div');
+            leftBlock.className = 'flex-1 min-w-0 flex flex-col';
             const titleSpan = document.createElement('span');
-            titleSpan.className = "flex-grow flex items-center gap-2 overflow-hidden";
+            titleSpan.className = "note-card-title flex items-center gap-2 overflow-hidden truncate";
             let iconHTML = '';
-            let textColor = '';
-            let privateNoteColor = null;
-            if (note.isPrivate) {
-                privateNoteColor = getFolderColor(note.folderId) || (note.tag && tagsConfig[note.tag]?.color) || '#38bdf8';
-                textColor = privateNoteColor;
-                iconHTML = `<i class="fas fa-lock flex-shrink-0" title="Nota privada" style="color: ${privateNoteColor}"></i>`;
-            } else if (note.tag) {
-                const tagConfig = tagsConfig[note.tag];
-                if (tagConfig) { if (tagConfig.color) { textColor = tagConfig.color; } if (tagConfig.icon) { const iconSrc = getDataURLForIcon(tagConfig.icon); if (iconSrc) { iconHTML += `<img src="${iconSrc}" class="w-5 h-5 rounded-full object-cover flex-shrink-0">`; } } }
-            }
-            const displayTitle = (note.title || '').substring(0, 25) + ((note.title || '').length > 25 ? '...' : '');
+            let textColor = stripeColor;
+            if (note.isPrivate) iconHTML = `<i class="fas fa-lock flex-shrink-0" title="Nota privada" style="color: ${stripeColor}"></i>`;
+            else if (note.tag && tagsConfig[note.tag]?.icon) { const iconSrc = getDataURLForIcon(tagsConfig[note.tag].icon); if (iconSrc) iconHTML = `<img src="${iconSrc}" class="w-5 h-5 rounded-full object-cover flex-shrink-0">`; }
+            const displayTitle = (note.title || '').substring(0, 50) + ((note.title || '').length > 50 ? '...' : '');
             let titleTextHTML; if (searchRegex) { titleTextHTML = displayTitle.replace(searchRegex, (match) => `<span class="search-highlight">${match}</span>`); } else { titleTextHTML = displayTitle; }
             titleSpan.innerHTML = `${iconHTML}<span class="truncate" style="color: ${textColor || 'inherit'}">${titleTextHTML}</span>`;
+            leftBlock.appendChild(titleSpan);
+            const d = normalizeDate(note.lastModified);
+            const dateStr = d ? d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+            if (dateStr) {
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'note-card-date';
+                dateSpan.textContent = dateStr;
+                leftBlock.appendChild(dateSpan);
+            }
+            li.appendChild(leftBlock);
             const pinBtn = document.createElement('button');
-            pinBtn.className = `pin-btn px-2 text-sm transition-colors ${note.pinned ? '' : 'text-slate-500'} hover:text-sky-400`;
+            pinBtn.className = `pin-btn px-2 text-sm transition-colors hidden md:flex ${note.pinned ? '' : 'text-slate-500'} hover:text-sky-400`;
             pinBtn.style.color = note.pinned ? 'var(--accent-color)' : '';
             pinBtn.innerHTML = `<i class="fas fa-thumbtack"></i>`;
             pinBtn.title = note.pinned ? "Desafixar nota" : "Fixar nota";
             pinBtn.onclick = (e) => { e.stopPropagation(); togglePinNote(note.id, note.isPrivate); };
-            li.appendChild(titleSpan);
             li.appendChild(pinBtn);
-            li.addEventListener('click', () => selectNote(note.id));
+            const menuBtn = document.createElement('button');
+            menuBtn.className = 'note-card-menu-btn';
+            menuBtn.type = 'button';
+            menuBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+            menuBtn.title = 'Opções';
+            menuBtn.onclick = (e) => { e.stopPropagation(); openMobileNoteContextMenu(e, note); };
+            li.appendChild(menuBtn);
+            li.addEventListener('click', (ev) => { if (!ev.target.closest('.note-card-menu-btn') && !ev.target.closest('.pin-btn')) selectNote(note.id); });
             return li;
         };
         const processBatch = () => {
@@ -7232,7 +7303,22 @@ const getStorageKey = (baseKey) => {
         };
         requestAnimationFrame(processBatch);
     };
-    const renderAllLists = () => { renderFolders(); renderVisualFilters(); renderNotesList(); };
+    const renderMobileCategoryPills = () => {
+        const pills = document.getElementById('mobile-category-pills');
+        if (!pills || !window.matchMedia('(max-width: 1024px)').matches) return;
+        pills.innerHTML = '';
+        const addPill = (label, folderId, active) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `mobile-pill ${active ? 'active' : ''}`;
+            btn.textContent = label;
+            btn.onclick = () => { currentFolder = folderId; renderFolders(); renderNotesList(); renderMobileCategoryPills(); };
+            pills.appendChild(btn);
+        };
+        addPill('Todas', null, currentFolder === null);
+        folders.forEach(f => addPill(f.name, f.id, currentFolder === f.id));
+    };
+    const renderAllLists = () => { renderFolders(); renderVisualFilters(); renderNotesList(); renderMobileCategoryPills(); };
     const performGlobalSearch = () => {
         const term = (searchInput.value || '').trim().toLowerCase();
         const dropdown = document.getElementById('global-search-dropdown');
@@ -8295,6 +8381,8 @@ const getStorageKey = (baseKey) => {
         document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
         document.getElementById('sidebar-overlay')?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
         document.getElementById('mobile-menu-btn')?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+        document.getElementById('mobile-search-btn')?.addEventListener('click', () => { searchInput?.focus(); document.body.classList.add('sidebar-open'); });
+        document.getElementById('mobile-menu-dots')?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
         document.getElementById('mobile-editor-back')?.addEventListener('click', () => { mobileEditorOpen = false; updateModeButtons(); });
         document.getElementById('mobile-fab')?.addEventListener('click', () => { if (typeof createNoteInLocalStorage === 'function') createNoteInLocalStorage(); });
         document.querySelectorAll('#mobile-bottom-nav .mobile-nav-item').forEach(el => {
