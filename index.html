@@ -2,10 +2,11 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DKNOTES</title>
     <link href="tailwind.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/lib/fontawesome.css">
+    <!-- FontAwesome via CDN para garantir ícones em todos os dispositivos (incl. Android) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
     <link rel="manifest" href="./manifest.json">
     <script src="vault.js"></script>
     <script src="chart.js"></script>
@@ -2142,6 +2143,88 @@
             border: none;
             cursor: pointer;
         }
+        
+        #sidebar-overlay { display: none; }
+        /* ========== Mobile: telas pequenas (leitura confortável + botões 44px) ========== */
+        @media (max-width: 768px) {
+            html { font-size: 18px; }
+            body { font-size: 1rem; }
+            #title-bar { display: none !important; }
+            #app-container { margin-top: 0 !important; height: 100vh !important; }
+            /* Sidebar retrátil: fora da tela por padrão */
+            #app-container aside {
+                position: fixed;
+                top: 0;
+                left: -320px;
+                width: 280px;
+                max-width: 85vw;
+                height: 100vh;
+                z-index: 1001;
+                margin: 0;
+                transition: left 0.25s ease;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            }
+            body.sidebar-open #app-container aside { left: 0; }
+            /* Overlay para fechar o menu ao toque */
+            #sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1000;
+                transition: opacity 0.2s;
+            }
+            body.sidebar-open #sidebar-overlay { display: block; }
+            /* Área principal ocupa toda a tela no mobile */
+            #app-container main {
+                flex: 1;
+                min-width: 0;
+                margin: 0 !important;
+                padding: 0.5rem !important;
+            }
+            /* Botão hamburger visível no mobile */
+            #sidebar-toggle-btn { display: flex !important; }
+            /* Botões do editor: mínimo 44px de altura (acessibilidade touch) */
+            .editor-button {
+                min-height: 44px;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.95rem;
+            }
+            /* Botões do modo (Notas, Dashboard, etc.) */
+            #mode-notes-btn, #mode-dashboard-btn, #mode-anexos-btn, #mode-mood-btn, #mode-events-btn {
+                min-height: 44px;
+                font-size: 0.9rem;
+                padding: 0.5rem 0.25rem;
+            }
+            .sidebar-footer-btn {
+                min-height: 44px;
+                font-size: 0.95rem;
+                padding: 0.5rem 0.75rem !important;
+            }
+            /* Lista de notas e itens do sidebar */
+            .note-list-item { padding: 0.6rem 0.75rem; font-size: 0.95rem; }
+            #search-input { font-size: 1rem; min-height: 44px; padding: 0.5rem 0.75rem; }
+            #note-title-input { font-size: 1.35rem !important; }
+            #note-editor, .ProseMirror { font-size: 1.05rem !important; line-height: 1.6 !important; }
+            #folders-header-btn, #collapse-all-folders-btn { min-height: 44px; font-size: 0.9rem; }
+            #new-note-btn, #templates-btn, #settings-btn { min-width: 44px; min-height: 44px; }
+        }
+        /* Botão hamburger: escondido no desktop */
+        #sidebar-toggle-btn {
+            display: none;
+            position: fixed;
+            top: 0.5rem;
+            left: 0.5rem;
+            z-index: 100;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--gh-border);
+            background: var(--gh-input-bg);
+            color: var(--gh-text);
+        }
     </style>
 </head>
 <body>
@@ -2197,8 +2280,10 @@
             <div id="splash-status" class="text-xs mt-4 text-slate-500 opacity-0 font-mono">INITIALIZING...</div>
         </div>
     </div>
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true" title="Fechar menu"></div>
+    <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Abrir menu"><i class="fas fa-bars"></i></button>
     <div id="app-container" class="flex h-screen opacity-0">
-        <aside class="w-72 min-w-[280px] flex flex-col p-4 border-r overflow-y-auto" style="border-color: var(--gh-border); background-color: var(--gh-bg);">
+        <aside id="app-sidebar" class="w-72 min-w-[280px] flex flex-col p-4 border-r overflow-y-auto" style="border-color: var(--gh-border); background-color: var(--gh-bg);">
             <header class="flex justify-between items-center mb-3 pb-3 border-b flex-shrink-0" style="border-color: var(--gh-border);">
                 <h1 class="text-xl font-bold" style="color: var(--accent-color);"><span class="text-glow">DKNOTES</span></h1>
                         <button id="new-note-btn" class="hover:text-white transition-colors" style="color: var(--accent-color);" title="Criar nova nota"><i class="fas fa-plus-square fa-lg"></i></button>
@@ -3388,8 +3473,8 @@
                     <p class="text-xs text-slate-500 mt-1">O DKNOTES será iniciado automaticamente quando o Windows iniciar</p>
                 </div>
                 
-                <!-- Pasta de Backup (sync Google Drive) -->
-                <div>
+                <!-- Pasta de Backup (apenas no desktop Electron; no Android/web usa só Exportar/Importar) -->
+                <div id="settings-backup-folder-block">
                     <label class="block text-sm font-semibold mb-2" style="color: var(--accent-color);">📁 Pasta de Backup</label>
                     <p class="text-xs text-slate-500 mb-2">Escolha a pasta onde guardar os backups automáticos.</p>
                     <div class="flex gap-2 mb-1">
@@ -4219,6 +4304,7 @@ const getStorageKey = (baseKey) => {
     };
     
     const switchToEventsView = () => {
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0;
         clickSound.play();
         currentView = 'events';
@@ -6211,7 +6297,38 @@ const getStorageKey = (baseKey) => {
     async function handleImportBackup() { 
         clickSound.currentTime = 0;
         clickSound.play().catch(() => {});
-        try { 
+        try {
+            if (!window.electronAPI?.importBackup) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json,application/json';
+                input.style.display = 'none';
+                document.body.appendChild(input);
+                input.onchange = async (e) => {
+                    const file = e.target.files?.[0];
+                    document.body.removeChild(input);
+                    if (!file) return;
+                    try {
+                        const text = await new Promise((res, rej) => {
+                            const r = new FileReader();
+                            r.onload = () => res(r.result);
+                            r.onerror = () => rej(new Error('Erro ao ler ficheiro'));
+                            r.readAsText(file, 'UTF-8');
+                        });
+                        const importedData = await parseBackupInWorker(text);
+                        const isLocalBackup = importedData.backupType === 'local';
+                        const isFullBackup = importedData.backupType === 'full' || (!importedData.backupType && Array.isArray(importedData.notes));
+                        if (isLocalBackup) await importLocalBackup(importedData);
+                        else if (isFullBackup) await importFullBackup(importedData);
+                        else throw new Error('Formato de backup não reconhecido.');
+                        showNotification('Backup importado com sucesso.', false);
+                    } catch (err) {
+                        showNotification('Erro ao importar: ' + (err.message || err), true);
+                    }
+                };
+                input.click();
+                return;
+            }
             const result = await window.electronAPI.importBackup(); 
             if (!result.success || !result.data) { 
                 if (result.error && result.error !== 'Dialog canceled') { 
@@ -6435,6 +6552,18 @@ const getStorageKey = (baseKey) => {
         clickSound.currentTime = 0; clickSound.play().catch(() => {});
         try {
             const dataToExport = { backupType: 'full', notes: notes, tagsConfig: tagsConfig, galleryAnnotations: galleryAnnotations, folders: folders, folderIcons: collectIconsForExport(), moodEntries: moodEntries, commemorativeEvents: commemorativeEvents, trashItems: trashItems, exportedAt: new Date().toISOString() };
+            if (!window.electronAPI?.saveBackup && !window.electronAPI?.backupSaveTimestamped) {
+                const json = JSON.stringify(dataToExport, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                const d = new Date();
+                a.download = `DKNOTES-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.json`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                showNotification('Backup descarregado. Guarde o ficheiro no seu dispositivo.', false);
+                return;
+            }
             const result = await window.electronAPI?.backupSaveTimestamped?.(JSON.stringify(dataToExport, null, 2)) ?? await window.electronAPI?.saveBackup?.(JSON.stringify(dataToExport, null, 2));
             if (result?.success) {
                 showNotification(`Backup guardado na pasta de backup (${new Date().toLocaleString('pt-PT')})`, false);
@@ -7122,6 +7251,7 @@ const getStorageKey = (baseKey) => {
         }
     };
     const selectNote = async (id) => { 
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0; 
         clickSound.play().catch(e => console.error("Erro ao tocar som:", e)); 
         const privNote = privateNotes.find(n => n.id === id);
@@ -7276,6 +7406,7 @@ const getStorageKey = (baseKey) => {
         }
     };
     const switchToDashboardView = () => { 
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0; 
         clickSound.play(); 
         currentView = 'dashboard'; 
@@ -7290,6 +7421,7 @@ const getStorageKey = (baseKey) => {
         updateModeButtons(); 
     };
     const switchToNotesView = () => { 
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0; 
         clickSound.play(); 
         currentView = 'notes'; 
@@ -7303,6 +7435,7 @@ const getStorageKey = (baseKey) => {
         updateModeButtons(); 
     };
     const switchToAnexosView = () => { 
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0; 
         clickSound.play(); 
         currentView = 'anexos'; 
@@ -7322,6 +7455,7 @@ const getStorageKey = (baseKey) => {
     };
     
     const switchToMoodView = () => { 
+        document.body.classList.remove('sidebar-open');
         clickSound.currentTime = 0; 
         clickSound.play(); 
         currentView = 'mood'; 
@@ -8031,6 +8165,9 @@ const getStorageKey = (baseKey) => {
         document.getElementById('dashboard-goto-mood')?.addEventListener('click', () => switchToMoodView());
         document.getElementById('dashboard-goto-events')?.addEventListener('click', () => switchToEventsView());
 
+        document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+        document.getElementById('sidebar-overlay')?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+
         setTimeout(runAutoBackup, 8000);
         
         // Event listeners para lembretes globais
@@ -8531,6 +8668,9 @@ const getStorageKey = (baseKey) => {
             }
             document.getElementById('settings-modal-overlay').classList.remove('hidden');
             if (typeof refreshBackupFolderDisplay === 'function') refreshBackupFolderDisplay();
+            var backupBlock = document.getElementById('settings-backup-folder-block');
+            if (backupBlock && !window.electronAPI?.backupGetFolder) backupBlock.classList.add('hidden');
+            else if (backupBlock) backupBlock.classList.remove('hidden');
         });
         
         document.getElementById('close-settings-modal-btn').addEventListener('click', () => {
