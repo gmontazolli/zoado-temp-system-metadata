@@ -2147,90 +2147,189 @@
         }
         
         #sidebar-overlay { display: none; }
-        /* ========== Mobile: layout responsivo, fontes legíveis, toque 44px ========== */
+        /* ========== Mobile: layout Bitwarden (top bar + lista + bottom nav + FAB) ========== */
+        #mobile-top-bar, #mobile-bottom-nav, #mobile-fab, #mobile-editor-back { display: none; }
         @media (max-width: 1024px) {
             html { font-size: 16px; max-width: 100vw; overflow-x: hidden; }
             body { font-size: 1rem; max-width: 100vw; overflow-x: hidden; }
             * { box-sizing: border-box; }
             #title-bar { display: none !important; }
-            #app-container { margin-top: 0 !important; height: 100vh !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
-            /* Sidebar: escondido atrás do hambúrguer (drawer) */
+            #mobile-top-bar, #mobile-bottom-nav, #mobile-fab { display: flex !important; }
+            #mobile-editor-back { display: flex !important; }
+            #app-container {
+                flex-direction: column !important;
+                margin-top: 0 !important;
+                height: 100vh !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow: hidden !important;
+                padding-top: 56px !important;
+                padding-bottom: 64px !important;
+            }
+            /* Top bar fixo - estilo Bitwarden */
+            #mobile-top-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 56px;
+                z-index: 200;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 12px;
+                background: var(--gh-bg);
+                border-bottom: 1px solid var(--gh-border);
+            }
+            #mobile-top-bar .mobile-logo { font-weight: 700; font-size: 1.1rem; color: var(--accent-color); }
+            #mobile-top-bar .mobile-actions { display: flex; align-items: center; gap: 8px; }
+            #mobile-top-bar .mobile-icon-btn {
+                width: 44px; height: 44px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 8px;
+                background: transparent;
+                border: none;
+                color: var(--gh-text);
+            }
+            #mobile-top-bar .mobile-icon-btn:active { background: var(--gh-input-bg); }
+            /* Bottom nav fixo - estilo Bitwarden */
+            #mobile-bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 64px;
+                z-index: 200;
+                align-items: center;
+                justify-content: space-around;
+                background: var(--gh-bg);
+                border-top: 1px solid var(--gh-border);
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+            #mobile-bottom-nav .mobile-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                height: 100%;
+                min-height: 44px;
+                background: none;
+                border: none;
+                color: var(--gh-text-muted);
+                font-size: 0.7rem;
+            }
+            #mobile-bottom-nav .mobile-nav-item i { font-size: 1.2rem; }
+            #mobile-bottom-nav .mobile-nav-item.active { color: var(--accent-color); }
+            #mobile-bottom-nav .mobile-nav-item:active { background: var(--gh-input-bg); }
+            /* FAB - criar nota */
+            #mobile-fab {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                z-index: 201;
+                align-items: center;
+                justify-content: center;
+                background: var(--accent-color);
+                color: #0f172a;
+                border: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            }
+            #mobile-fab:active { transform: scale(0.95); }
+            /* Botão voltar no editor */
+            #mobile-editor-back {
+                width: 44px; height: 44px;
+                align-items: center; justify-content: center;
+                background: transparent; border: none; color: var(--gh-text);
+            }
+            /* Sidebar = drawer (menu lateral) */
             #app-container aside {
                 position: fixed;
                 top: 0;
                 left: -320px;
-                width: min(280px, 85vw);
-                max-width: 100vw;
+                width: min(300px, 90vw);
                 height: 100vh;
                 z-index: 1001;
                 margin: 0;
-                transition: left 0.25s ease;
+                transition: left 0.2s ease;
                 box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+                flex-direction: column;
+                padding-top: 56px;
             }
             body.sidebar-open #app-container aside { left: 0; }
+            body.sidebar-open #sidebar-overlay { display: block; }
             #sidebar-overlay {
-                display: none;
                 position: fixed;
                 inset: 0;
                 background: rgba(0,0,0,0.5);
                 z-index: 1000;
             }
-            body.sidebar-open #sidebar-overlay { display: block; }
-            /* Main: sem margens laterais, container ocupa toda a largura */
+            /* Esconder header/buttons do sidebar no mobile (usamos top bar e bottom nav) */
+            #app-container aside header,
+            #app-container aside #mode-buttons-grid,
+            #app-container aside #user-info { display: none !important; }
+            #sidebar-toggle-btn { display: none !important; }
+            /* Conteúdo: lista ou editor - Bitwarden list/detail */
             #app-container main {
                 flex: 1;
                 min-width: 0;
                 width: 100%;
-                max-width: 100vw;
                 margin: 0 !important;
-                padding: 0.25rem !important;
-                overflow-x: hidden;
+                padding: 0 !important;
+                overflow: hidden;
             }
+            body.mobile-editor-open #app-container aside { display: none !important; }
+            body:not(.mobile-editor-open) #app-container main { display: none !important; }
+            body.mobile-editor-open #app-container main { display: flex !important; flex: 1; flex-direction: column; }
+            body.mobile-editor-open #mobile-fab { display: none !important; }
+            body:not(.current-view-notes) #app-container aside { display: none !important; }
+            body:not(.current-view-notes) #app-container main { display: flex !important; flex: 1; flex-direction: column; }
+            body:not(.current-view-notes) #mobile-fab { display: none !important; }
+            /* Aside no modo lista: full width, só lista de notas */
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside {
+                position: relative !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                box-shadow: none;
+                padding: 0 12px;
+                overflow-y: auto;
+            }
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside #sidebar-search-wrapper { margin-bottom: 8px; }
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside #sidebar-footer-buttons { display: none !important; }
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside #check-updates-btn,
+            body.current-view-notes:not(.mobile-editor-open) #app-container aside #update-status { display: none !important; }
+            /* Lista de notas - cards limpos */
+            .note-list-item {
+                padding: 14px 12px;
+                font-size: 1rem;
+                min-height: 56px;
+                margin-bottom: 4px;
+                border-radius: 10px;
+            }
+            .note-list-item.selected { border-left-width: 4px; }
             .glass-effect, #editor-container, #notes-view .glass-effect, #dashboard-view .glass-effect {
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
-                padding: 0.5rem !important;
-                border-radius: 0.5rem !important;
+                padding: 12px !important;
+                border-radius: 0 !important;
             }
-            #note-content-area { padding: 0.5rem !important; }
-            #sidebar-toggle-btn { display: flex !important; }
-            /* Botões e inputs: mínimo 44px de altura (área de toque) */
-            .editor-button { min-height: 44px; padding: 0.5rem 0.75rem !important; font-size: 0.95rem; }
-            #mode-notes-btn, #mode-dashboard-btn, #mode-anexos-btn, #mode-mood-btn, #mode-events-btn {
-                min-height: 44px;
-                font-size: 0.9rem;
-                padding: 0.5rem 0.25rem;
-            }
-            .sidebar-footer-btn { min-height: 44px; font-size: 0.95rem; padding: 0.5rem 0.75rem !important; }
-            .format-btn, .tag-filter-master-btn { min-height: 44px; min-width: 44px; padding: 0.5rem !important; }
-            input[type="text"], input[type="password"], input[type="search"], input[type="email"], textarea { min-height: 44px; font-size: 16px !important; }
-            #search-input { font-size: 1rem; min-height: 44px; padding: 0.5rem 0.75rem; }
+            #editor-container .p-3 { padding: 8px 12px !important; flex-wrap: wrap; }
+            #note-content-area { padding: 12px !important; }
+            .editor-button { min-height: 44px; padding: 8px 12px !important; font-size: 0.9rem; }
+            input[type="text"], input[type="password"], input[type="search"], textarea { min-height: 44px; font-size: 16px !important; }
+            #search-input, #mobile-search-input { font-size: 1rem; min-height: 44px; }
             #note-title-input { font-size: 1.25rem !important; min-height: 44px; }
-            #note-editor, .ProseMirror { font-size: 1rem !important; line-height: 1.6 !important; min-height: 120px; }
-            .note-list-item { padding: 0.75rem; font-size: 1rem; min-height: 44px; }
-            #folders-header-btn, #collapse-all-folders-btn { min-height: 44px; font-size: 0.9rem; }
-            #new-note-btn, #templates-btn, #settings-btn { min-width: 44px; min-height: 44px; }
+            #note-editor, .ProseMirror { font-size: 1rem !important; line-height: 1.6 !important; }
+            #folders-header-btn, #collapse-all-folders-btn, .sidebar-footer-btn { min-height: 44px; padding: 10px !important; }
             #global-search-dropdown { max-width: 100vw; }
-            #note-tag-btn { min-height: 44px; font-size: 0.95rem; }
-            .mood-reminder { max-width: min(280px, 90vw); right: 0.5rem; top: 0.5rem; }
-            .glass-effect-modal { max-width: min(100%, 100vw) !important; margin: 0 0.5rem !important; }
-        }
-        /* Botão hamburger: escondido no desktop */
-        #sidebar-toggle-btn {
-            display: none;
-            position: fixed;
-            top: 0.5rem;
-            left: 0.5rem;
-            z-index: 100;
-            width: 44px;
-            height: 44px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            border: 1px solid var(--gh-border);
-            background: var(--gh-input-bg);
-            color: var(--gh-text);
+            #note-tag-btn { min-height: 44px; }
+            .mood-reminder { max-width: min(280px, 90vw); }
+            .glass-effect-modal { max-width: min(100%, 100vw) !important; margin: 0 12px !important; }
         }
     </style>
 </head>
@@ -2289,6 +2388,20 @@
     </div>
     <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true" title="Fechar menu"></div>
     <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Abrir menu"><i class="fas fa-bars"></i></button>
+    <header id="mobile-top-bar">
+        <span class="mobile-logo">DKNOTES</span>
+        <div class="mobile-actions">
+            <button type="button" id="mobile-menu-btn" class="mobile-icon-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+    <nav id="mobile-bottom-nav">
+        <button type="button" id="mobile-nav-notes" class="mobile-nav-item" data-view="notes"><i class="fas fa-sticky-note"></i><span>Notas</span></button>
+        <button type="button" id="mobile-nav-dashboard" class="mobile-nav-item" data-view="dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></button>
+        <button type="button" id="mobile-nav-anexos" class="mobile-nav-item" data-view="anexos"><i class="fas fa-paperclip"></i><span>Anexos</span></button>
+        <button type="button" id="mobile-nav-mood" class="mobile-nav-item" data-view="mood"><i class="fas fa-smile"></i><span>Anotações</span></button>
+        <button type="button" id="mobile-nav-events" class="mobile-nav-item" data-view="events"><i class="fas fa-calendar-alt"></i><span>Datas</span></button>
+    </nav>
+    <button type="button" id="mobile-fab" aria-label="Nova nota"><i class="fas fa-plus"></i></button>
     <div id="app-container" class="flex h-screen opacity-0">
         <aside id="app-sidebar" class="w-72 min-w-[280px] flex flex-col p-4 border-r overflow-y-auto" style="border-color: var(--gh-border); background-color: var(--gh-bg);">
             <header class="flex justify-between items-center mb-3 pb-3 border-b flex-shrink-0" style="border-color: var(--gh-border);">
@@ -2412,6 +2525,7 @@
             <div id="notes-view" class="flex-1 flex flex-col min-w-0 overflow-hidden">
                 <div id="editor-container" class="flex-1 flex flex-col min-w-0 overflow-hidden rounded-r-lg shadow-lg glass-effect">
                     <div class="p-3 flex justify-start items-center flex-wrap gap-2 rounded-tr-lg" style="background-color: var(--gh-canvas); border-bottom: 1px solid var(--gh-border);">
+                        <button type="button" id="mobile-editor-back" aria-label="Voltar"><i class="fas fa-arrow-left"></i></button>
                         <button id="save-note-btn" class="editor-button" title="Guardar nota"><i class="fas fa-save"></i><span>Salvar</span></button>
                         <button id="delete-note-btn" class="editor-button" title="Apagar nota"><i class="fas fa-trash"></i><span>Apagar</span></button>
                         <button id="duplicate-note-btn" class="editor-button" title="Duplicar nota"><i class="far fa-copy"></i><span>Duplicar</span></button>
@@ -7215,6 +7329,7 @@ const getStorageKey = (baseKey) => {
         }
         dropdown.classList.remove('hidden');
     };
+    let mobileEditorOpen = false;
     const updateModeButtons = () => { 
         const modeDashboardBtn = document.getElementById('mode-dashboard-btn');
         const modeNotesBtn = document.getElementById('mode-notes-btn');
@@ -7222,31 +7337,28 @@ const getStorageKey = (baseKey) => {
         const modeMoodBtn = document.getElementById('mode-mood-btn');
         const modeEventsBtn = document.getElementById('mode-events-btn');
         
-        // Remover classe 'active' de todos os botões e limpar estilos inline
         [modeDashboardBtn, modeNotesBtn, modeAnexosBtnEl, modeMoodBtn, modeEventsBtn].forEach(btn => {
             if (btn) {
                 btn.classList.remove('active');
-                // Remover estilos inline para permitir que o CSS funcione
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
                 btn.style.color = '';
             }
         });
         
-        // Adicionar classe 'active' no botão correspondente à view atual
-        if (currentView === 'dashboard' && modeDashboardBtn) {
-            modeDashboardBtn.classList.add('active');
-        } else if (currentView === 'notes' && modeNotesBtn) {
-            modeNotesBtn.classList.add('active');
-        } else if (currentView === 'anexos' && modeAnexosBtnEl) {
-            modeAnexosBtnEl.classList.add('active');
-        } else if (currentView === 'mood' && modeMoodBtn) {
-            modeMoodBtn.classList.add('active');
-        } else if (currentView === 'events' && modeEventsBtn) {
-            modeEventsBtn.classList.add('active');
-        }
+        if (currentView === 'dashboard' && modeDashboardBtn) modeDashboardBtn.classList.add('active');
+        else if (currentView === 'notes' && modeNotesBtn) modeNotesBtn.classList.add('active');
+        else if (currentView === 'anexos' && modeAnexosBtnEl) modeAnexosBtnEl.classList.add('active');
+        else if (currentView === 'mood' && modeMoodBtn) modeMoodBtn.classList.add('active');
+        else if (currentView === 'events' && modeEventsBtn) modeEventsBtn.classList.add('active');
+        
+        document.querySelectorAll('#mobile-bottom-nav .mobile-nav-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.view === currentView);
+        });
+        document.body.classList.toggle('current-view-notes', currentView === 'notes');
+        document.body.classList.toggle('mobile-editor-open', currentView === 'notes' && !!currentNoteId && mobileEditorOpen && window.matchMedia('(max-width: 1024px)').matches);
     };
-    const updateEditorVisibility = () => { const noteIsSelected = currentNoteId !== null; welcomeMessage.classList.toggle('is-visible', !noteIsSelected); welcomeMessage.classList.toggle('is-hidden', noteIsSelected); noteContentArea.classList.toggle('is-visible', noteIsSelected); noteContentArea.classList.toggle('is-hidden', !noteIsSelected); if (!noteIsSelected) { tagSelectorContainer.classList.add('hidden'); formattingToolbar.classList.add('hidden'); } updateEditorButtonsState(noteIsSelected); };
+    const updateEditorVisibility = () => { const noteIsSelected = currentNoteId !== null; welcomeMessage.classList.toggle('is-visible', !noteIsSelected); welcomeMessage.classList.toggle('is-hidden', noteIsSelected); noteContentArea.classList.toggle('is-visible', noteIsSelected); noteContentArea.classList.toggle('is-hidden', !noteIsSelected); if (!noteIsSelected) { tagSelectorContainer.classList.add('hidden'); formattingToolbar.classList.add('hidden'); } updateEditorButtonsState(noteIsSelected); if (typeof updateModeButtons === 'function') updateModeButtons(); };
     const updateEditorButtonsState = (noteIsSelected) => { saveNoteBtn.disabled = !noteIsSelected; deleteNoteBtn.disabled = !noteIsSelected; duplicateNoteBtn.disabled = !noteIsSelected; copyNoteBtn.disabled = !noteIsSelected; const exportMenuBtn = document.getElementById('export-menu-btn'); if (exportMenuBtn) exportMenuBtn.disabled = !noteIsSelected; document.getElementById('stickers-btn').disabled = !noteIsSelected; const imgBtn = document.getElementById('image-menu-btn'); if (imgBtn) imgBtn.disabled = !noteIsSelected; const linkNoteBtn = document.getElementById('link-note-btn'); if (linkNoteBtn) linkNoteBtn.disabled = !noteIsSelected; };
     const togglePinNote = (id, isPrivate = false) => {
         if (isPrivate) {
@@ -7259,6 +7371,7 @@ const getStorageKey = (baseKey) => {
     };
     const selectNote = async (id) => { 
         document.body.classList.remove('sidebar-open');
+        if (window.matchMedia('(max-width: 1024px)').matches) mobileEditorOpen = true;
         clickSound.currentTime = 0; 
         clickSound.play().catch(e => console.error("Erro ao tocar som:", e)); 
         const privNote = privateNotes.find(n => n.id === id);
@@ -7429,6 +7542,7 @@ const getStorageKey = (baseKey) => {
     };
     const switchToNotesView = () => { 
         document.body.classList.remove('sidebar-open');
+        mobileEditorOpen = false;
         clickSound.currentTime = 0; 
         clickSound.play(); 
         currentView = 'notes'; 
@@ -8180,6 +8294,19 @@ const getStorageKey = (baseKey) => {
 
         document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
         document.getElementById('sidebar-overlay')?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+        document.getElementById('mobile-editor-back')?.addEventListener('click', () => { mobileEditorOpen = false; updateModeButtons(); });
+        document.getElementById('mobile-fab')?.addEventListener('click', () => { if (typeof createNoteInLocalStorage === 'function') createNoteInLocalStorage(); });
+        document.querySelectorAll('#mobile-bottom-nav .mobile-nav-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const v = el.dataset.view;
+                if (v === 'notes') switchToNotesView();
+                else if (v === 'dashboard') switchToDashboardView();
+                else if (v === 'anexos') switchToAnexosView();
+                else if (v === 'mood') switchToMoodView();
+                else if (v === 'events') switchToEventsView();
+            });
+        });
 
         setTimeout(runAutoBackup, 8000);
         
