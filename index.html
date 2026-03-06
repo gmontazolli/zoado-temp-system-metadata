@@ -2386,7 +2386,8 @@
                 </div>
             </div>
             <p id="vault-setup-error" class="text-red-400 text-sm mb-3 hidden"></p>
-            <button id="vault-setup-btn" class="w-full px-4 py-2 rounded-md font-semibold transition-colors" style="background-color: var(--accent-color); color: #0f172a;"><i class="fas fa-check mr-2"></i>Criar</button>
+            <button id="vault-setup-btn" class="w-full px-4 py-2 rounded-md font-semibold transition-colors mb-2" style="background-color: var(--accent-color); color: #0f172a;"><i class="fas fa-check mr-2"></i>Criar</button>
+            <button id="vault-setup-skip-btn" class="w-full px-4 py-2 rounded-md font-semibold border-2 transition-colors" style="border-color: var(--gh-border); color: var(--gh-text-muted);"><i class="fas fa-arrow-right mr-2"></i>Usar sem senha (guardar localmente)</button>
         </div>
     </div>
     <div id="vault-unlock-overlay" class="fixed inset-0 z-[99998] flex items-center justify-center bg-black hidden">
@@ -2421,7 +2422,6 @@
     <nav id="mobile-bottom-nav">
         <button type="button" id="mobile-nav-notes" class="mobile-nav-item" data-view="notes"><i class="fas fa-sticky-note"></i><span>Notas</span></button>
         <button type="button" id="mobile-nav-dashboard" class="mobile-nav-item" data-view="dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></button>
-        <button type="button" id="mobile-nav-anexos" class="mobile-nav-item" data-view="anexos"><i class="fas fa-paperclip"></i><span>Anexos</span></button>
         <button type="button" id="mobile-nav-mood" class="mobile-nav-item" data-view="mood"><i class="fas fa-smile"></i><span>Anotações</span></button>
         <button type="button" id="mobile-nav-events" class="mobile-nav-item" data-view="events"><i class="fas fa-calendar-alt"></i><span>Datas</span></button>
     </nav>
@@ -2439,7 +2439,6 @@
             <div id="mode-buttons-grid" class="grid grid-cols-3 gap-1.5 mb-4">
                 <button id="mode-notes-btn">Notas</button>
                 <button id="mode-dashboard-btn" title="Painel geral">Dashboard</button>
-                <button id="mode-anexos-btn">Anexos</button>
                 <button id="mode-mood-btn">Anotações</button>
                 <button id="mode-events-btn" class="relative">Datas</button>
             </div>
@@ -2539,7 +2538,6 @@
                             <h3 class="text-slate-300 font-semibold mb-2"><i class="fas fa-star mr-2" style="color: var(--accent-color);"></i>Acesso rápido</h3>
                             <div class="flex flex-wrap gap-2">
                                 <button type="button" id="dashboard-goto-notes" class="px-4 py-2 rounded-md border-2 border-slate-500 text-slate-300 hover:bg-slate-600 hover:border-slate-400 transition-colors font-semibold text-sm">Notas</button>
-                                <button type="button" id="dashboard-goto-anexos" class="px-4 py-2 rounded-md border-2 border-slate-500 text-slate-300 hover:bg-slate-600 hover:border-slate-400 transition-colors font-semibold text-sm">Anexos</button>
                                 <button type="button" id="dashboard-goto-mood" class="px-4 py-2 rounded-md border-2 border-slate-500 text-slate-300 hover:bg-slate-600 hover:border-slate-400 transition-colors font-semibold text-sm">Anotações</button>
                                 <button type="button" id="dashboard-goto-events" class="px-4 py-2 rounded-md border-2 border-slate-500 text-slate-300 hover:bg-slate-600 hover:border-slate-400 transition-colors font-semibold text-sm">Datas</button>
                             </div>
@@ -3334,7 +3332,7 @@
                     <input type="text" id="folder-name-input" placeholder="Ex: Trabalho, Pessoal, Estudos..." class="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-300 rounded-md">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-300">Ícone</label>
+                    <label class="block text-sm font-semibold mb-2 text-slate-300">Ícone <span class="text-slate-500 font-normal">(opcional)</span></label>
                     <div id="folder-icons-grid" class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto bg-slate-800/50 p-3 rounded-md"></div>
                 </div>
                 <div>
@@ -4737,13 +4735,8 @@ const getStorageKey = (baseKey) => {
             folderBtn.className = `w-full text-left px-2 py-0.5 text-sm rounded transition-colors flex items-center justify-between group ${currentFolder === folder.id ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'}`;
             
             // Encontrar o ícone correspondente
-            const iconData = availableIcons.find(icon => icon.filename === folder.icon);
-            console.log(`Renderizando pasta ${folder.name}:`, {
-                folderIcon: folder.icon,
-                iconData: iconData,
-                availableIconsCount: availableIcons.length
-            });
-            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-4 h-4 object-cover rounded">` : `<span class="text-base">${folder.icon}</span>`;
+            const iconData = folder.icon ? availableIcons.find(icon => icon.filename === folder.icon) : null;
+            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-4 h-4 object-cover rounded">` : `<i class="fas fa-folder text-slate-400 text-base"></i>`;
             
             // Obter cor da pasta: prioridade = classe WoW > tag configurada > tema
             const cleanIconName = (folder.icon || '').replace(/\.(png|jpg|jpeg|gif)$/i, '').toLowerCase();
@@ -4993,15 +4986,10 @@ const getStorageKey = (baseKey) => {
             return;
         }
         
-        if (!selectedIcon) {
-            showNotification('Selecione um ícone para a pasta!', true);
-            return;
-        }
-        
         const newFolder = {
             id: `folder_${Date.now()}`,
             name: name,
-            icon: selectedIcon,
+            icon: selectedIcon || null,
             createdAt: new Date().toISOString()
         };
         
@@ -5132,7 +5120,7 @@ const getStorageKey = (baseKey) => {
             if (folderIndex !== -1) {
                 console.log('Antes da edição:', folders[folderIndex]);
                 folders[folderIndex].name = newName;
-                folders[folderIndex].icon = selectedIcon;
+                folders[folderIndex].icon = selectedIcon || null;
                 console.log('Depois da edição:', folders[folderIndex]);
                 console.log('Ícone selecionado:', selectedIcon);
                 console.log('AvailableIcons:', availableIcons.length);
@@ -5220,19 +5208,16 @@ const getStorageKey = (baseKey) => {
     const renderExistingFolders = () => {
         const existingFoldersList = document.getElementById('existing-folders-list');
         existingFoldersList.innerHTML = '';
-        
         if (folders.length === 0) {
             existingFoldersList.innerHTML = '<p class="text-slate-400 text-sm italic">Nenhuma pasta criada ainda.</p>';
             return;
         }
-        
         folders.forEach(folder => {
             const folderItem = document.createElement('div');
             folderItem.className = 'flex items-center justify-between p-2 bg-slate-800/50 rounded-md';
             
-            // Encontrar o ícone correspondente
-            const iconData = availableIcons.find(icon => icon.filename === folder.icon);
-            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-5 h-5 object-cover rounded">` : `<span>${folder.icon}</span>`;
+            const iconData = folder.icon ? availableIcons.find(icon => icon.filename === folder.icon) : null;
+            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-5 h-5 object-cover rounded">` : `<i class="fas fa-folder text-slate-400"></i>`;
             
             folderItem.innerHTML = `
                 <div class="flex items-center gap-2">
@@ -5291,10 +5276,8 @@ const getStorageKey = (baseKey) => {
             const folderBtn = document.createElement('button');
             folderBtn.className = 'w-full text-left px-3 py-2 bg-slate-800/50 rounded-md text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2';
             
-            // Encontrar o ícone correspondente
-            const iconData = availableIcons.find(icon => icon.filename === folder.icon);
-            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-5 h-5 object-cover rounded">` : `<span>${folder.icon}</span>`;
-            
+            const iconData = folder.icon ? availableIcons.find(icon => icon.filename === folder.icon) : null;
+            const iconHTML = iconData ? `<img src="${iconData.dataURL}" class="w-5 h-5 object-cover rounded">` : `<i class="fas fa-folder text-slate-400"></i>`;
             folderBtn.innerHTML = `${iconHTML}<span>${folder.name}</span>`;
             folderBtn.onclick = () => moveNoteToFolder(folder.id, modal);
             moveFoldersList.appendChild(folderBtn);
@@ -8370,7 +8353,7 @@ const getStorageKey = (baseKey) => {
         
         document.getElementById('mode-dashboard-btn').addEventListener('click', () => switchToDashboardView());
         modeNotesBtn.addEventListener('click', () => switchToNotesView());
-        modeAnexosBtn.addEventListener('click', () => switchToAnexosView());
+        modeAnexosBtn?.addEventListener('click', () => switchToAnexosView());
         document.getElementById('mode-mood-btn').addEventListener('click', () => switchToMoodView());
         document.getElementById('mode-events-btn').addEventListener('click', () => switchToEventsView());
         document.getElementById('dashboard-goto-notes')?.addEventListener('click', () => switchToNotesView());
@@ -9584,6 +9567,7 @@ const getStorageKey = (baseKey) => {
         window.electronAPI?.onUserData?.(doUserDataInit);
         const user = await window.electronAPI?.getUserData?.();
         if (user !== undefined) await doUserDataInit(user);
+        else if (!window.electronAPI) await doUserDataInit({ local: true });
 
         addEventListeners();
         if (window.electronAPI?.getAppVersion) {
@@ -9665,6 +9649,12 @@ const getStorageKey = (baseKey) => {
         document.getElementById('vault-unlock-password').value = '';
         document.getElementById('vault-unlock-error').classList.add('hidden');
     };
+    function skipVaultAndStart() {
+        document.getElementById('vault-setup-overlay').classList.add('hidden');
+        document.getElementById('vault-unlock-overlay').classList.add('hidden');
+        document.getElementById('app-container').style.opacity = '1';
+        startApp();
+    }
     function checkVaultAndProceed() {
         const V = window.DKNOTES_Vault;
         if (!V) { startApp(); return; }
@@ -9701,6 +9691,7 @@ const getStorageKey = (baseKey) => {
             proceedAfterVaultUnlocked(payload);
         } catch (e) { errEl.textContent = e.message || 'Erro ao criar cofre.'; errEl.classList.remove('hidden'); }
     });
+    document.getElementById('vault-setup-skip-btn')?.addEventListener('click', () => { skipVaultAndStart(); });
     document.getElementById('vault-unlock-btn')?.addEventListener('click', async () => {
         const pw = document.getElementById('vault-unlock-password').value;
         const errEl = document.getElementById('vault-unlock-error');
