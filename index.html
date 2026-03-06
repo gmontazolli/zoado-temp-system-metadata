@@ -4007,6 +4007,7 @@ const getStorageKey = (baseKey) => {
     // Funções de Configurações
     // Função para verificar o status da inicialização automática no Windows
     const checkStartupStatus = async () => {
+        if (!window.electronAPI?.getStartupStatus) return;
         try {
             const result = await window.electronAPI.getStartupStatus();
             if (result.success) {
@@ -8352,7 +8353,7 @@ const getStorageKey = (baseKey) => {
         });
         
         document.getElementById('mode-dashboard-btn').addEventListener('click', () => switchToDashboardView());
-        modeNotesBtn.addEventListener('click', () => switchToNotesView());
+        modeNotesBtn?.addEventListener('click', () => switchToNotesView());
         modeAnexosBtn?.addEventListener('click', () => switchToAnexosView());
         document.getElementById('mode-mood-btn').addEventListener('click', () => switchToMoodView());
         document.getElementById('mode-events-btn').addEventListener('click', () => switchToEventsView());
@@ -9504,11 +9505,15 @@ const getStorageKey = (baseKey) => {
             console.log('👤 Usuário definido:', currentUserId);
             console.log('🔍 Modo offline?', !currentUser);
             
-            const iconResult = await window.electronAPI.getIconFiles();
-            if (iconResult.success) { 
-                availableIcons = iconResult.icons.sort((a, b) => a.filename.localeCompare(b.filename)); 
-            } 
-            else { console.error("Não foi possível carregar os ícones:", iconResult.error); }
+            if (window.electronAPI?.getIconFiles) {
+                try {
+                    const iconResult = await window.electronAPI.getIconFiles();
+                    if (iconResult?.success && iconResult.icons?.length) { 
+                        availableIcons = iconResult.icons.sort((a, b) => a.filename.localeCompare(b.filename)); 
+                    }
+                } catch (e) { console.warn("Ícones não disponíveis:", e); }
+            }
+            if (!availableIcons?.length) availableIcons = [];
             
             // Armazenamento 100% local - sem login
             userInfo.textContent = 'Armazenamento local';
